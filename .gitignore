@@ -1,0 +1,23 @@
+# Compilation
+/build/
+/target/
+sources.txt
+*.class
+
+# Dépendances téléchargées (régénérables)
+/lib/*.jar
+
+# IDE
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.vscode/
+
+# Divers
+*.log
+.DS_Store
+
+# Config locale Claude Code
+.claude/settings.local.json
