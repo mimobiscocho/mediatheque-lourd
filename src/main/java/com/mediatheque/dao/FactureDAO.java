@@ -11,18 +11,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * DAO pour la gestion des factures (jointure client).
+ * DAO pour la gestion des factures (jointure avec la table {@code adherent}).
+ *
+ * <p>La classe Java {@code Facture} conserve les setters/getters
+ * {@code setClientId/getClientId} pour rester homogène avec le reste de
+ * l'IHM, mais les requêtes SQL utilisent {@code adherent_id} (modèle de
+ * données unifié partagé avec le client léger).
  */
 public class FactureDAO implements DAO<Facture> {
 
     private static final String SELECT_BASE =
-            "SELECT f.*, CONCAT(c.prenom, ' ', c.nom) AS client_nom "
-          + "FROM facture f JOIN client c ON f.client_id = c.id ";
+            "SELECT f.*, CONCAT(a.prenom, ' ', a.nom) AS client_nom "
+          + "FROM facture f JOIN adherent a ON f.adherent_id = a.id ";
 
     private Facture mapper(ResultSet rs) throws SQLException {
         Facture f = new Facture();
         f.setId(rs.getInt("id"));
-        f.setClientId(rs.getInt("client_id"));
+        f.setClientId(rs.getInt("adherent_id"));
         f.setLibelle(rs.getString("libelle"));
         f.setMontant(rs.getBigDecimal("montant"));
         f.setDateEmission(rs.getDate("date_emission").toLocalDate());
@@ -33,7 +38,7 @@ public class FactureDAO implements DAO<Facture> {
 
     @Override
     public void create(Facture f) {
-        String sql = "INSERT INTO facture (client_id, libelle, montant, date_emission, statut) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO facture (adherent_id, libelle, montant, date_emission, statut) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement ps = DatabaseConnection.getConnection()
                 .prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             remplir(ps, f);
@@ -50,7 +55,7 @@ public class FactureDAO implements DAO<Facture> {
 
     @Override
     public void update(Facture f) {
-        String sql = "UPDATE facture SET client_id=?, libelle=?, montant=?, date_emission=?, statut=? WHERE id=?";
+        String sql = "UPDATE facture SET adherent_id=?, libelle=?, montant=?, date_emission=?, statut=? WHERE id=?";
         try (PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement(sql)) {
             remplir(ps, f);
             ps.setInt(6, f.getId());

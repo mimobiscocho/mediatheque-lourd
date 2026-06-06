@@ -110,21 +110,36 @@ La connexion est **partagée entre tous les DAO** ; sa fermeture est
 déclenchée à la fermeture de la JVM via un `Runtime.getRuntime().addShutdownHook(...)`
 installé dans `Main`.
 
-## 4. Modèle de données
+## 4. Modèle de données — schéma unifié
 
-7 tables, en moteur **InnoDB**, jeu de caractères `utf8mb4_unicode_ci`.
+L'application partage **une seule base** `mediatheque` avec le client léger
+(application web PHP). Le schéma est strictement identique dans les deux
+dépôts ; il suffit d'importer le script SQL une seule fois pour initialiser
+les deux applications.
 
-### Tables et clés étrangères
+Le client lourd exploite directement : `profil` (auth), `adherent`,
+`technicien`, `animation`, `facture`. Il **partage** avec le client léger
+les tables `adherent`, `salle` et `reservation`.
+
+> **Note d'implémentation** : pour ne pas réécrire toute l'IHM, la classe
+> Java garde le nom `Client` (POJO, DAO, Panel, Dialog), mais les requêtes
+> SQL ciblent bien la table `adherent`. Le mapper recopie `adherent_id`
+> vers `setClientId(...)`.
+
+Toutes les tables sont en moteur **InnoDB**, jeu de caractères
+`utf8mb4_unicode_ci`.
+
+### Tables et clés étrangères (vues du client lourd)
 
 | Table | Rôle | Clés étrangères |
 |-------|------|-----------------|
-| `profil` | Comptes agents (login, mot de passe PBKDF2, rôle) | — |
-| `client` | Adhérents | — |
+| `profil` | Comptes agents desktop (login, mot de passe PBKDF2, rôle) | — |
+| `adherent` | Adhérents (partagée avec le léger) | `abonnement_id` (SET NULL) |
 | `technicien` | Animateurs / intervenants | — |
-| `salle` | Salles de coworking | — |
+| `salle` | Salles de coworking (partagée) | — |
 | `animation` | Animations | `salle_id`, `technicien_id` (RESTRICT) |
-| `reservation` | Réservations de salles | `client_id` (CASCADE), `salle_id` (RESTRICT) |
-| `facture` | Factures | `client_id` (CASCADE) |
+| `reservation` | Réservations de salles (partagée) | `adherent_id` (CASCADE), `salle_id` (RESTRICT) |
+| `facture` | Factures | `adherent_id` (CASCADE) |
 
 ### Schéma relationnel (simplifié)
 

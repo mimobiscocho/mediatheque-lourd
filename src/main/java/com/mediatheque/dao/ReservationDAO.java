@@ -18,15 +18,15 @@ import java.util.List;
 public class ReservationDAO implements DAO<Reservation> {
 
     private static final String SELECT_BASE =
-            "SELECT r.*, CONCAT(c.prenom, ' ', c.nom) AS client_nom, s.nom AS salle_nom "
+            "SELECT r.*, CONCAT(a.prenom, ' ', a.nom) AS client_nom, s.nom AS salle_nom "
           + "FROM reservation r "
-          + "JOIN client c ON r.client_id = c.id "
-          + "JOIN salle s ON r.salle_id = s.id ";
+          + "JOIN adherent a ON r.adherent_id = a.id "
+          + "JOIN salle s    ON r.salle_id    = s.id ";
 
     private Reservation mapper(ResultSet rs) throws SQLException {
         Reservation r = new Reservation();
         r.setId(rs.getInt("id"));
-        r.setClientId(rs.getInt("client_id"));
+        r.setClientId(rs.getInt("adherent_id"));
         r.setSalleId(rs.getInt("salle_id"));
         r.setDateReservation(rs.getDate("date_reservation").toLocalDate());
         r.setHeureDebut(rs.getTime("heure_debut").toLocalTime());
@@ -39,7 +39,7 @@ public class ReservationDAO implements DAO<Reservation> {
 
     @Override
     public void create(Reservation r) {
-        String sql = "INSERT INTO reservation (client_id, salle_id, date_reservation, heure_debut, heure_fin, statut) "
+        String sql = "INSERT INTO reservation (adherent_id, salle_id, date_reservation, heure_debut, heure_fin, statut) "
                 + "VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = DatabaseConnection.getConnection()
                 .prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -58,7 +58,7 @@ public class ReservationDAO implements DAO<Reservation> {
 
     @Override
     public void update(Reservation r) {
-        String sql = "UPDATE reservation SET client_id=?, salle_id=?, date_reservation=?, heure_debut=?, heure_fin=?, statut=? WHERE id=?";
+        String sql = "UPDATE reservation SET adherent_id=?, salle_id=?, date_reservation=?, heure_debut=?, heure_fin=?, statut=? WHERE id=?";
         try (PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement(sql)) {
             remplir(ps, r);
             ps.setInt(7, r.getId());

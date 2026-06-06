@@ -12,6 +12,11 @@ import java.util.List;
 
 /**
  * DAO pour la gestion des clients (adhérents).
+ *
+ * <p>Les requêtes SQL ciblent la table {@code adherent} : c'est la table
+ * commune partagée avec le client léger. La classe Java conserve le nom
+ * {@code Client} (de même que {@code ClientPanel}, {@code ClientDialog}, etc.)
+ * pour ne pas perturber le reste de l'IHM.
  */
 public class ClientDAO implements DAO<Client> {
 
@@ -34,7 +39,7 @@ public class ClientDAO implements DAO<Client> {
 
     @Override
     public void create(Client c) {
-        String sql = "INSERT INTO client (nom, prenom, email, telephone, adresse, type_abonnement, date_inscription, actif) "
+        String sql = "INSERT INTO adherent (nom, prenom, email, telephone, adresse, type_abonnement, date_inscription, actif) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = DatabaseConnection.getConnection()
                 .prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -52,7 +57,7 @@ public class ClientDAO implements DAO<Client> {
 
     @Override
     public void update(Client c) {
-        String sql = "UPDATE client SET nom=?, prenom=?, email=?, telephone=?, adresse=?, type_abonnement=?, date_inscription=?, actif=? WHERE id=?";
+        String sql = "UPDATE adherent SET nom=?, prenom=?, email=?, telephone=?, adresse=?, type_abonnement=?, date_inscription=?, actif=? WHERE id=?";
         try (PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement(sql)) {
             remplir(ps, c);
             ps.setInt(9, c.getId());
@@ -76,7 +81,7 @@ public class ClientDAO implements DAO<Client> {
     @Override
     public void delete(int id) {
         try (PreparedStatement ps = DatabaseConnection.getConnection()
-                .prepareStatement("DELETE FROM client WHERE id = ?")) {
+                .prepareStatement("DELETE FROM adherent WHERE id = ?")) {
             ps.setInt(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -87,7 +92,7 @@ public class ClientDAO implements DAO<Client> {
     @Override
     public Client findById(int id) {
         try (PreparedStatement ps = DatabaseConnection.getConnection()
-                .prepareStatement("SELECT * FROM client WHERE id = ?")) {
+                .prepareStatement("SELECT * FROM adherent WHERE id = ?")) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -103,7 +108,7 @@ public class ClientDAO implements DAO<Client> {
     @Override
     public List<Client> findAll() {
         List<Client> liste = new ArrayList<>();
-        String sql = "SELECT * FROM client ORDER BY nom, prenom";
+        String sql = "SELECT * FROM adherent ORDER BY nom, prenom";
         try (Statement st = DatabaseConnection.getConnection().createStatement();
              ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
@@ -118,7 +123,7 @@ public class ClientDAO implements DAO<Client> {
     /** Recherche multicritères sur nom, prénom ou email. */
     public List<Client> rechercher(String motCle) {
         List<Client> liste = new ArrayList<>();
-        String sql = "SELECT * FROM client WHERE nom LIKE ? OR prenom LIKE ? OR email LIKE ? ORDER BY nom, prenom";
+        String sql = "SELECT * FROM adherent WHERE nom LIKE ? OR prenom LIKE ? OR email LIKE ? ORDER BY nom, prenom";
         try (PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement(sql)) {
             String like = "%" + motCle + "%";
             ps.setString(1, like);

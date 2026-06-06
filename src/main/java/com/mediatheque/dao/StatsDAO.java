@@ -20,7 +20,7 @@ public class StatsDAO {
      */
     public Map<String, Integer> compteurs() {
         String sql =
-                "SELECT (SELECT COUNT(*) FROM client)      AS nb_clients,"
+                "SELECT (SELECT COUNT(*) FROM adherent)    AS nb_clients,"
               + "       (SELECT COUNT(*) FROM technicien)  AS nb_techniciens,"
               + "       (SELECT COUNT(*) FROM salle)       AS nb_salles,"
               + "       (SELECT COUNT(*) FROM animation)   AS nb_animations,"

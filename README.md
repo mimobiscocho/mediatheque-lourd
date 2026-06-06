@@ -53,11 +53,26 @@ src/main/java/com/mediatheque/
 - **Vue** : fenêtres et panneaux Swing (aucune logique métier).
 - **Contrôleur** : validation et orchestration entre vue et DAO.
 
-## 🗄️ Base de données
+## 🗄️ Base de données — schéma unifié
 
-- 7 tables : `profil`, `client`, `technicien`, `salle`, `animation`, `reservation`, `facture`.
-- 4 **triggers** assurant l'automatisation de la vérification des disponibilités
-  (créneaux qui se chevauchent à l'insertion **et** à la modification, salle indisponible).
+L'application partage **une seule base** `mediatheque` avec le client léger
+(application web PHP). Le schéma est strictement identique dans les deux dépôts.
+
+- Tables exploitées par cette application (client lourd) : `profil`,
+  `adherent`, `technicien`, `animation`, `facture`.
+- Tables **partagées** avec le client léger : `adherent`, `salle`,
+  `reservation`.
+- Tables ignorées par cette application (mais présentes pour le léger) :
+  `agent`, `abonnement`, `livre`, `materiel`, `pret`.
+
+> Note : la classe Java conserve le nom `Client` (DAO, Panel, Dialog) pour
+> ne pas perturber l'IHM ; toutes les requêtes SQL ciblent bien la table
+> `adherent` du schéma unifié.
+
+- 4 **triggers** sur `reservation` et `animation` assurent la vérification
+  des disponibilités (créneaux qui se chevauchent à l'insertion **et** à
+  la modification, salle indisponible). 4 autres triggers (sur `pret`)
+  sont définis pour le léger.
 - Scripts dans `sql/` : `01_schema.sql` (structure + triggers), `02_data.sql` (jeu de données).
 
 ## 🚀 Installation et lancement
