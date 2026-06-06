@@ -22,6 +22,7 @@ public class ProfilController {
      * haché avant persistance ; laissé vide en modification, il reste inchangé.
      */
     public void enregistrer(Profil p, String motDePasseClair) {
+        exigerAdmin();
         if (p.getLogin() == null || p.getLogin().isBlank()) {
             throw new DAOException("Le login est obligatoire.");
         }
@@ -45,9 +46,21 @@ public class ProfilController {
     }
 
     public void supprimer(int id) {
+        exigerAdmin();
         if (Session.getProfil() != null && Session.getProfil().getId() == id) {
             throw new DAOException("Vous ne pouvez pas supprimer votre propre compte.");
         }
         dao.delete(id);
+    }
+
+    /**
+     * Garantit que la gestion des profils n'est jamais réalisée sans droits
+     * d'administration, même si quelqu'un instancie ce contrôleur depuis
+     * un autre point d'entrée que l'interface graphique.
+     */
+    private void exigerAdmin() {
+        if (!Session.estAdmin()) {
+            throw new DAOException("Accès refusé : la gestion des profils est réservée aux administrateurs.");
+        }
     }
 }

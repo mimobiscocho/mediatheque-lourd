@@ -63,14 +63,22 @@ public class AnimationPanel extends JPanel {
     }
 
     private void rafraichir() {
-        donnees = controller.lister();
+        try {
+            donnees = controller.lister();
+        } catch (RuntimeException ex) {
+            donnees = java.util.Collections.emptyList();
+            JOptionPane.showMessageDialog(this,
+                    "Impossible de charger les animations : " + ex.getMessage(),
+                    "Erreur", JOptionPane.ERROR_MESSAGE);
+        }
         model.setRowCount(0);
         DateTimeFormatter df = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         DateTimeFormatter tf = DateTimeFormatter.ofPattern("HH:mm");
         for (Animation a : donnees) {
             model.addRow(new Object[]{a.getId(), a.getTitre(),
-                    a.getDateAnimation().format(df),
-                    a.getHeureDebut().format(tf), a.getHeureFin().format(tf),
+                    a.getDateAnimation() == null ? "" : a.getDateAnimation().format(df),
+                    a.getHeureDebut()    == null ? "" : a.getHeureDebut().format(tf),
+                    a.getHeureFin()      == null ? "" : a.getHeureFin().format(tf),
                     a.getNbPlaces(), a.getSalleNom(), a.getTechnicienNom()});
         }
     }

@@ -4,12 +4,13 @@
 -- =============================================================================
 USE mediatheque;
 
--- Profils (mots de passe : SHA-256)
---   admin / admin123     (240be518...)
---   agent / agent123     (f44d1ac9...)
+-- Profils (mots de passe : PBKDF2-HMAC-SHA256, 600 000 itérations, sel par compte)
+--   admin / admin123
+--   agent / agent123
+-- Format : pbkdf2_sha256$iterations$saltBase64$hashBase64 (cf. util/PasswordUtil)
 INSERT INTO profil (login, mot_de_passe, nom, prenom, role) VALUES
- ('admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', 'SEBAH',  'Nassim', 'ADMIN'),
- ('agent', 'f44d1ac9bf0c69b083380b86dbdf3b73797150e3cca4820ac399f7917e607647', 'MARTIN', 'Claire', 'AGENT');
+ ('admin', 'pbkdf2_sha256$600000$kYdMj/fJowhQRkVtIRVfcw==$HP9KtqpivNhzRsWVbrZMztl2ZM50eM7iHOa549xn0cQ=', 'SEBAH',  'Nassim', 'ADMIN'),
+ ('agent', 'pbkdf2_sha256$600000$3L3LJ+tGGTiQBhkedUdS1A==$WJXNC6YzeMb2scj0x62TyCGbrZDXdv8sM1TorHr/AFA=', 'MARTIN', 'Claire', 'AGENT');
 
 -- Clients (adhérents)
 INSERT INTO client (nom, prenom, email, telephone, adresse, type_abonnement, date_inscription) VALUES

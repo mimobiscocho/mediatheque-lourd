@@ -1,6 +1,16 @@
-# Démarre une base MySQL pré-initialisée avec le schéma et les données.
-#   docker compose up -d
-# La base est accessible sur localhost:3306 (user root / mot de passe root).
+# =============================================================================
+#  Environnement de DÉVELOPPEMENT : base MySQL pré-initialisée avec le schéma
+#  et le jeu de données de démonstration.
+#
+#  Démarrage  : docker compose up -d
+#  Arrêt      : docker compose down
+#  Réinit BD  : docker compose down -v   (puis up -d)
+#
+#  Connexion par défaut : localhost:3306, utilisateur root, mot de passe root.
+#  Ces identifiants sont à usage local uniquement — en production, surchargez
+#  l'utilisateur et le mot de passe via les variables d'environnement
+#  MEDIATHEQUE_DB_USER / MEDIATHEQUE_DB_PASSWORD (cf. DatabaseConnection).
+# =============================================================================
 services:
   mysql:
     image: mysql:8.4
@@ -9,6 +19,9 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: mediatheque
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
     ports:
       - "3306:3306"
     volumes:

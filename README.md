@@ -3,8 +3,18 @@
 Application **desktop** de gestion de la médiathèque de Bourg-la-Reine, développée en
 **Java 17 (Swing)** avec une base de données **MySQL** et une persistance via **JDBC**.
 
-Réalisation professionnelle n°2 — BTS SIO option SLAM — Session 2026
+Situation professionnelle n°2 (SP2) — BTS SIO option SLAM — Session 2026
 **SEBAH Nassim**
+
+## Sommaire
+
+1. [Fonctionnalités](#-fonctionnalités)
+2. [Architecture](#-architecture)
+3. [Base de données](#-base-de-données)
+4. [Installation et lancement](#-installation-et-lancement)
+5. [Comptes de démonstration](#-comptes-de-démonstration)
+6. [Documentation](#-documentation)
+7. [Technologies](#-technologies)
 
 ---
 
@@ -36,7 +46,7 @@ src/main/java/com/mediatheque/
 ├── dao/                       # Accès aux données (JDBC) + interface générique DAO<T>
 ├── controller/                # Logique métier et validation
 ├── view/                      # Interfaces graphiques Swing
-└── util/                      # Hachage SHA-256, charte graphique
+└── util/                      # Hachage PBKDF2-HMAC-SHA256 salé, charte graphique
 ```
 
 - **Modèle** : POJO + DAO (couche d'accès aux données isolée).
@@ -46,8 +56,8 @@ src/main/java/com/mediatheque/
 ## 🗄️ Base de données
 
 - 7 tables : `profil`, `client`, `technicien`, `salle`, `animation`, `reservation`, `facture`.
-- 3 **triggers** assurant l'automatisation de la vérification des disponibilités
-  (créneaux qui se chevauchent, salle indisponible).
+- 4 **triggers** assurant l'automatisation de la vérification des disponibilités
+  (créneaux qui se chevauchent à l'insertion **et** à la modification, salle indisponible).
 - Scripts dans `sql/` : `01_schema.sql` (structure + triggers), `02_data.sql` (jeu de données).
 
 ## 🚀 Installation et lancement
@@ -71,22 +81,35 @@ mysql -u root -p < sql/02_data.sql
 
 ### 2. Configurer la connexion
 
-Adaptez si besoin `src/main/resources/database.properties` :
-```properties
-db.url=jdbc:mysql://localhost:3306/mediatheque?useSSL=false&serverTimezone=Europe/Paris&allowPublicKeyRetrieval=true
-db.user=root
-db.password=root
+Les valeurs par défaut conviennent à un environnement local Docker. En
+production, surchargez-les via les **variables d'environnement** (priorité sur
+le fichier) :
+```bash
+export MEDIATHEQUE_DB_URL="jdbc:mysql://serveur:3306/mediatheque?useSSL=true&serverTimezone=Europe/Paris&characterEncoding=utf8"
+export MEDIATHEQUE_DB_USER="mediatheque_app"
+export MEDIATHEQUE_DB_PASSWORD="********"
 ```
+Sinon, adaptez `src/main/resources/database.properties`.
 
 ### 3. Compiler et lancer
 
-**Avec les scripts fournis (sans Maven) :**
+**Linux / macOS (scripts fournis, sans Maven) :**
 ```bash
 ./build.sh      # télécharge le connecteur JDBC si besoin et compile
 ./run.sh        # lance l'application
 ```
 
-**Avec Maven :**
+**Windows (sans Maven) :**
+```bat
+:: Téléchargez puis placez mysql-connector-j-8.4.0.jar dans lib\
+mkdir build
+dir /S /B src\main\java\*.java > sources.txt
+javac -encoding UTF-8 -d build -cp lib\mysql-connector-j.jar @sources.txt
+xcopy /Y src\main\resources\* build\
+java -cp "build;lib\mysql-connector-j.jar" com.mediatheque.Main
+```
+
+**Avec Maven (toutes plateformes) :**
 ```bash
 mvn clean package
 java -jar target/mediatheque-clientlourd-jar-with-dependencies.jar
@@ -101,14 +124,22 @@ java -jar target/mediatheque-clientlourd-jar-with-dependencies.jar
 | `admin` | `admin123` | ADMIN (accès au module Profils) |
 | `agent` | `agent123` | AGENT |
 
-> Les mots de passe sont stockés sous forme d'empreinte **SHA-256**.
+> Les mots de passe sont stockés sous forme d'empreinte **PBKDF2-HMAC-SHA256**
+> (600 000 itérations, sel aléatoire de 16 octets par compte — cf.
+> `util/PasswordUtil`).
 
 ## 📚 Documentation
 
-- [`docs/documentation-technique.md`](docs/documentation-technique.md) — architecture, modèle de données, choix techniques.
-- [`docs/documentation-utilisateur.md`](docs/documentation-utilisateur.md) — guide d'utilisation pas à pas.
-- [`docs/gestion-incidents.md`](docs/gestion-incidents.md) — incidents rencontrés et résolutions.
+| Document | Contenu |
+|----------|---------|
+| [`docs/documentation-technique.md`](docs/documentation-technique.md) | Architecture MVC + DAO, modèle de données, triggers, sécurité, build, déploiement |
+| [`docs/documentation-utilisateur.md`](docs/documentation-utilisateur.md) | Guide utilisateur pas à pas (connexion, modules, messages, bonnes pratiques) |
+| [`docs/gestion-incidents.md`](docs/gestion-incidents.md) | Suivi des incidents rencontrés et résolutions (GLPI) |
 
 ## 🧰 Technologies
 
-Java 17 · Swing · JDBC · MySQL 8 · Maven · Git/GitHub · architecture MVC.
+Java 17 · Swing · JDBC · MySQL 8 · Maven · Docker Compose · Git/GitHub · architecture MVC + DAO.
+
+---
+
+*Réalisation : SEBAH Nassim — BTS SIO SLAM — Session 2026.*

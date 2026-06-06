@@ -63,12 +63,16 @@ public class AnimationDialog extends JDialog {
     }
 
     private void chargerCombos() {
-        List<Salle> salles = new SalleController().lister();
-        for (Salle s : salles) {
-            salleCombo.addItem(s);
+        int salleCouranteId = animation.getSalleId();
+        for (Salle s : new SalleController().lister()) {
+            // En création, on n'affiche que les salles disponibles.
+            // En modification, on conserve la salle déjà liée même si elle a
+            // été marquée indisponible depuis (sinon le combo serait vide).
+            if (s.isDisponible() || s.getId() == salleCouranteId) {
+                salleCombo.addItem(s);
+            }
         }
-        List<Technicien> techniciens = new TechnicienController().lister();
-        for (Technicien t : techniciens) {
+        for (Technicien t : new TechnicienController().lister()) {
             technicienCombo.addItem(t);
         }
     }

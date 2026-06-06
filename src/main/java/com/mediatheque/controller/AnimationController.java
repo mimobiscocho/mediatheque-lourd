@@ -24,6 +24,9 @@ public class AnimationController {
                 || !a.getHeureFin().isAfter(a.getHeureDebut())) {
             throw new DAOException("L'heure de fin doit être postérieure à l'heure de début.");
         }
+        if (a.getNbPlaces() < 0) {
+            throw new DAOException("Le nombre de places ne peut pas être négatif.");
+        }
         if (a.getSalleId() <= 0 || a.getTechnicienId() <= 0) {
             throw new DAOException("La salle et le technicien doivent être sélectionnés.");
         }

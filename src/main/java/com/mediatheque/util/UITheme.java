@@ -70,7 +70,9 @@ public final class UITheme {
         table.setSelectionForeground(TEXT);
         JTableHeader header = table.getTableHeader();
         header.setBackground(PRIMARY);
-        header.setForeground(Color.black);
+        // Texte blanc sur fond bleu institutionnel (contraste WCAG AA).
+        header.setForeground(WHITE);
         header.setFont(H2);
+        header.setOpaque(true);
     }
 }

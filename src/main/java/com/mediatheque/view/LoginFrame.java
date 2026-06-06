@@ -47,7 +47,7 @@ public class LoginFrame extends JFrame {
 
         JLabel titre = new JLabel("<html><div style='text-align:center;'>"
                 + "MÉDIATHÈQUE<br>de Bourg-la-Reine</div></html>", SwingConstants.CENTER);
-        titre.setForeground(Color.black);
+        titre.setForeground(UITheme.WHITE);
         titre.setFont(UITheme.TITLE);
         p.add(titre);
         return p;
@@ -116,7 +116,10 @@ public class LoginFrame extends JFrame {
             dispose();
             new MainFrame().setVisible(true);
         } catch (RuntimeException ex) {
-            messageLabel.setText("Erreur de connexion à la base : " + ex.getMessage());
+            // On journalise les détails techniques, et on n'affiche qu'un
+            // message neutre (pas de fuite de chaîne JDBC à l'écran).
+            System.err.println("[Mediatheque] Connexion BD : " + ex.getMessage());
+            messageLabel.setText("Connexion à la base impossible. Contactez l'administrateur.");
         }
     }
 }

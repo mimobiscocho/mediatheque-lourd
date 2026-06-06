@@ -8,7 +8,14 @@ import java.util.Properties;
 
 /**
  * Gère la connexion unique (singleton) à la base de données MySQL via JDBC.
- * Les paramètres sont lus dans le fichier {@code database.properties}.
+ *
+ * <p>Les paramètres sont lus dans cet ordre de priorité :
+ * <ol>
+ *   <li>Variables d'environnement {@code MEDIATHEQUE_DB_URL},
+ *       {@code MEDIATHEQUE_DB_USER}, {@code MEDIATHEQUE_DB_PASSWORD}
+ *       — utilisées en production pour ne pas versionner les secrets ;</li>
+ *   <li>Fichier {@code database.properties} sur le classpath, sinon.</li>
+ * </ol>
  */
 public final class DatabaseConnection {
 
@@ -24,18 +31,31 @@ public final class DatabaseConnection {
         Properties props = new Properties();
         try (InputStream in = DatabaseConnection.class
                 .getClassLoader().getResourceAsStream("database.properties")) {
-            if (in == null) {
-                throw new IllegalStateException(
-                        "Fichier database.properties introuvable dans le classpath.");
+            if (in != null) {
+                props.load(in);
             }
-            props.load(in);
-            url = props.getProperty("db.url");
-            user = props.getProperty("db.user");
-            password = props.getProperty("db.password");
         } catch (Exception e) {
             throw new IllegalStateException(
                     "Impossible de charger la configuration de la base : " + e.getMessage(), e);
         }
+        url      = firstNonBlank(System.getenv("MEDIATHEQUE_DB_URL"),      props.getProperty("db.url"));
+        user     = firstNonBlank(System.getenv("MEDIATHEQUE_DB_USER"),     props.getProperty("db.user"));
+        password = firstNonBlank(System.getenv("MEDIATHEQUE_DB_PASSWORD"), props.getProperty("db.password"));
+
+        if (url == null) {
+            throw new IllegalStateException(
+                    "URL JDBC non configurée (MEDIATHEQUE_DB_URL ou database.properties).");
+        }
+    }
+
+    private static String firstNonBlank(String a, String b) {
+        if (a != null && !a.isBlank()) {
+            return a;
+        }
+        if (b != null && !b.isBlank()) {
+            return b;
+        }
+        return null;
     }
 
     /**

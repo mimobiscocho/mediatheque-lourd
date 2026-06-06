@@ -2,7 +2,6 @@ package com.mediatheque.controller;
 
 import com.mediatheque.dao.ProfilDAO;
 import com.mediatheque.model.Profil;
-import com.mediatheque.util.PasswordUtil;
 
 /**
  * Contrôleur d'authentification : vérifie les identifiants et ouvre la session.
@@ -20,8 +19,9 @@ public class AuthController {
         if (login == null || login.isBlank() || motDePasse == null || motDePasse.isBlank()) {
             return null;
         }
-        String hash = PasswordUtil.hash(motDePasse);
-        Profil profil = profilDAO.authentifier(login.trim(), hash);
+        // La vérification du mot de passe (PBKDF2 salé) est faite dans le DAO,
+        // pas comparée en SQL : chaque empreinte a son propre sel.
+        Profil profil = profilDAO.authentifier(login.trim(), motDePasse);
         if (profil != null) {
             Session.ouvrir(profil);
         }

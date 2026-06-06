@@ -63,14 +63,23 @@ public class ReservationPanel extends JPanel {
     }
 
     private void rafraichir() {
-        donnees = controller.lister();
+        try {
+            donnees = controller.lister();
+        } catch (RuntimeException ex) {
+            donnees = java.util.Collections.emptyList();
+            JOptionPane.showMessageDialog(this,
+                    "Impossible de charger les réservations : " + ex.getMessage(),
+                    "Erreur", JOptionPane.ERROR_MESSAGE);
+        }
         model.setRowCount(0);
         DateTimeFormatter df = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         DateTimeFormatter tf = DateTimeFormatter.ofPattern("HH:mm");
         for (Reservation r : donnees) {
             model.addRow(new Object[]{r.getId(), r.getClientNom(), r.getSalleNom(),
-                    r.getDateReservation().format(df),
-                    r.getHeureDebut().format(tf), r.getHeureFin().format(tf), r.getStatut()});
+                    r.getDateReservation() == null ? "" : r.getDateReservation().format(df),
+                    r.getHeureDebut()      == null ? "" : r.getHeureDebut().format(tf),
+                    r.getHeureFin()        == null ? "" : r.getHeureFin().format(tf),
+                    r.getStatut()});
         }
     }
 

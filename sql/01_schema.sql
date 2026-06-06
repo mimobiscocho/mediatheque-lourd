@@ -181,4 +181,24 @@ BEGIN
     END IF;
 END//
 
+-- Même vérification lors d'une modification d'animation
+-- (sinon une animation existante pourrait être déplacée sur un créneau occupé).
+CREATE TRIGGER trg_animation_before_update
+BEFORE UPDATE ON animation
+FOR EACH ROW
+BEGIN
+    DECLARE v_conflits INT;
+    SELECT COUNT(*) INTO v_conflits
+    FROM animation
+    WHERE salle_id = NEW.salle_id
+      AND id <> NEW.id
+      AND date_animation = NEW.date_animation
+      AND NEW.heure_debut < heure_fin
+      AND NEW.heure_fin   > heure_debut;
+    IF v_conflits > 0 THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'La salle est deja occupee par une animation sur ce creneau.';
+    END IF;
+END//
+
 DELIMITER ;

@@ -63,12 +63,21 @@ public class FacturePanel extends JPanel {
     }
 
     private void rafraichir() {
-        donnees = controller.lister();
+        try {
+            donnees = controller.lister();
+        } catch (RuntimeException ex) {
+            donnees = java.util.Collections.emptyList();
+            JOptionPane.showMessageDialog(this,
+                    "Impossible de charger les factures : " + ex.getMessage(),
+                    "Erreur", JOptionPane.ERROR_MESSAGE);
+        }
         model.setRowCount(0);
         DateTimeFormatter df = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         for (Facture f : donnees) {
             model.addRow(new Object[]{f.getId(), f.getClientNom(), f.getLibelle(),
-                    f.getMontant(), f.getDateEmission().format(df), f.getStatut()});
+                    f.getMontant(),
+                    f.getDateEmission() == null ? "" : f.getDateEmission().format(df),
+                    f.getStatut()});
         }
     }
 

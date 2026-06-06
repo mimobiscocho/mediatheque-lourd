@@ -26,18 +26,21 @@ public class ProfilDAO implements DAO<Profil> {
     }
 
     /**
-     * Recherche un profil par login et empreinte de mot de passe.
+     * Recherche un profil par login, puis vérifie le mot de passe en mémoire
+     * (PBKDF2 salé : on ne peut pas comparer le hash directement en SQL).
      *
      * @return le profil si les identifiants sont valides, sinon {@code null}.
      */
-    public Profil authentifier(String login, String hashMotDePasse) {
-        String sql = "SELECT * FROM profil WHERE login = ? AND mot_de_passe = ?";
+    public Profil authentifier(String login, String motDePasseClair) {
+        String sql = "SELECT * FROM profil WHERE login = ?";
         try (PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement(sql)) {
             ps.setString(1, login);
-            ps.setString(2, hashMotDePasse);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return mapper(rs);
+                    Profil p = mapper(rs);
+                    if (com.mediatheque.util.PasswordUtil.verify(motDePasseClair, p.getMotDePasse())) {
+                        return p;
+                    }
                 }
             }
         } catch (SQLException e) {

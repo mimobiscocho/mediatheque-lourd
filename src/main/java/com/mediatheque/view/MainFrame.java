@@ -63,14 +63,14 @@ public class MainFrame extends JFrame {
         entete.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
 
         JLabel titre = new JLabel("Médiathèque de Bourg-la-Reine");
-        titre.setForeground(Color.black);
+        titre.setForeground(UITheme.WHITE);
         titre.setFont(UITheme.H2);
         entete.add(titre, BorderLayout.WEST);
 
         JPanel droite = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         droite.setOpaque(false);
         JLabel user = new JLabel("Connecté : " + Session.getProfil().toString());
-        user.setForeground(Color.black);
+        user.setForeground(UITheme.WHITE);
         droite.add(user);
 
         JButton deconnexion = new JButton("Déconnexion");
@@ -109,10 +109,11 @@ public class MainFrame extends JFrame {
         b.setAlignmentX(Component.CENTER_ALIGNMENT);
         b.setHorizontalAlignment(SwingConstants.LEFT);
         b.setBackground(UITheme.PRIMARY);
-        b.setForeground(Color.black);
+        b.setForeground(UITheme.WHITE);
         b.setFont(new Font("SansSerif", Font.PLAIN, 15));
         b.setFocusPainted(false);
         b.setBorderPainted(false);
+        b.setOpaque(true);
         b.setBorder(BorderFactory.createEmptyBorder(8, 24, 8, 8));
         b.addActionListener(e -> {
             cardLayout.show(contentPanel, carte);

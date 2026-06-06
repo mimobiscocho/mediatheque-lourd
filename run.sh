@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Lance l'application (après ./build.sh).
+# Pour Windows, voir les instructions équivalentes dans le README.md.
 set -e
 cd "$(dirname "$0")"
 
