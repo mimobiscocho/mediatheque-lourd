@@ -35,33 +35,45 @@ public class ClientPanel extends JPanel {
     private List<Client> donnees;
 
     public ClientPanel() {
-        setLayout(new BorderLayout(0, 12));
+        setLayout(new BorderLayout(0, 16));
         setBackground(UITheme.BACKGROUND);
-        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        setBorder(BorderFactory.createEmptyBorder(28, 28, 28, 28));
 
         add(creerEntete(), BorderLayout.NORTH);
         UITheme.styleTable(table);
-        add(new JScrollPane(table), BorderLayout.CENTER);
+        add(UITheme.wrapTable(table), BorderLayout.CENTER);
         add(creerBarreBoutons(), BorderLayout.SOUTH);
 
         rafraichir();
     }
 
     private JPanel creerEntete() {
-        JPanel entete = new JPanel(new BorderLayout());
+        JPanel entete = new JPanel(new BorderLayout(0, 0));
         entete.setOpaque(false);
-        entete.add(UITheme.title("Gestion des clients"), BorderLayout.WEST);
 
-        JPanel recherche = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        JPanel gauche = new JPanel();
+        gauche.setOpaque(false);
+        gauche.setLayout(new javax.swing.BoxLayout(gauche, javax.swing.BoxLayout.Y_AXIS));
+        gauche.add(UITheme.title("Clients"));
+        JLabel sous = UITheme.subtitle("Adhérents de la médiathèque — recherche par nom, prénom ou email.");
+        sous.setBorder(BorderFactory.createEmptyBorder(2, 0, 0, 0));
+        gauche.add(sous);
+        entete.add(gauche, BorderLayout.WEST);
+
+        JPanel recherche = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
         recherche.setOpaque(false);
-        recherche.add(new JLabel("Rechercher :"));
+        rechercheField.setFont(UITheme.NORMAL);
+        rechercheField.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(UITheme.BORDER, 1),
+                BorderFactory.createEmptyBorder(6, 10, 6, 10)));
         recherche.add(rechercheField);
-        JButton btn = new JButton("OK");
+        JButton btn = new JButton("Rechercher");
         UITheme.stylePrimaryButton(btn);
         btn.addActionListener(e -> rechercher());
         rechercheField.addActionListener(e -> rechercher());
         recherche.add(btn);
-        JButton reset = new JButton("Tout");
+        JButton reset = new JButton("Effacer");
+        UITheme.styleGhostButton(reset);
         reset.addActionListener(e -> {
             rechercheField.setText("");
             rafraichir();
@@ -72,14 +84,16 @@ public class ClientPanel extends JPanel {
     }
 
     private JPanel creerBarreBoutons() {
-        JPanel barre = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        JPanel barre = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
         barre.setOpaque(false);
-        JButton ajouter = new JButton("Ajouter");
+        barre.setBorder(BorderFactory.createEmptyBorder(4, 0, 0, 0));
+        JButton ajouter  = new JButton("+ Nouveau client");
         JButton modifier = new JButton("Modifier");
         JButton supprimer = new JButton("Supprimer");
         UITheme.stylePrimaryButton(ajouter);
-        UITheme.styleAccentButton(modifier);
-        UITheme.styleDangerButton(supprimer);
+        UITheme.styleGhostButton(modifier);
+        UITheme.styleGhostButton(supprimer);
+        supprimer.setForeground(UITheme.DANGER);
         ajouter.addActionListener(e -> ouvrirFormulaire(null));
         modifier.addActionListener(e -> modifierSelection());
         supprimer.addActionListener(e -> supprimerSelection());

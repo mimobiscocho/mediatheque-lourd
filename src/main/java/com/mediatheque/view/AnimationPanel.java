@@ -33,13 +33,13 @@ public class AnimationPanel extends JPanel {
     private List<Animation> donnees;
 
     public AnimationPanel() {
-        setLayout(new BorderLayout(0, 12));
+        setLayout(new BorderLayout(0, 16));
         setBackground(UITheme.BACKGROUND);
-        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        setBorder(BorderFactory.createEmptyBorder(28, 28, 28, 28));
 
         add(UITheme.title("Gestion des animations"), BorderLayout.NORTH);
         UITheme.styleTable(table);
-        add(new JScrollPane(table), BorderLayout.CENTER);
+        add(UITheme.wrapTable(table), BorderLayout.CENTER);
         add(creerBarreBoutons(), BorderLayout.SOUTH);
         rafraichir();
     }
