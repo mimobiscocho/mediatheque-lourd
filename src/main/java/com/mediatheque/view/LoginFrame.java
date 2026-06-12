@@ -175,33 +175,6 @@ public class LoginFrame extends JFrame {
         messageLabel.setFont(UITheme.SMALL);
         p.add(messageLabel, g);
 
-        // Comptes fournis avec le jeu de données de démonstration
-        g.gridy = 6;
-        g.insets = new Insets(20, 0, 0, 0);
-        JPanel aide = new JPanel();
-        aide.setLayout(new BoxLayout(aide, BoxLayout.Y_AXIS));
-        aide.setBackground(UITheme.PRIMARY_CLAIR);
-        aide.setBorder(new CompoundBorder(
-                new UITheme.RoundedBorder(UITheme.PRIMARY_CLAIR, 8, 1),
-                new EmptyBorder(10, 14, 10, 14)));
-        JLabel titreAide = new JLabel("Comptes de démonstration");
-        titreAide.setFont(UITheme.SMALL_BOLD);
-        titreAide.setForeground(UITheme.PRIMARY_FONCE);
-        titreAide.setAlignmentX(Component.LEFT_ALIGNMENT);
-        aide.add(titreAide);
-        JLabel ligne1 = new JLabel("admin / admin123 — administrateur");
-        ligne1.setFont(UITheme.SMALL);
-        ligne1.setForeground(UITheme.PRIMARY_FONCE);
-        ligne1.setAlignmentX(Component.LEFT_ALIGNMENT);
-        ligne1.setBorder(new EmptyBorder(3, 0, 0, 0));
-        aide.add(ligne1);
-        JLabel ligne2 = new JLabel("agent / agent123 — agent");
-        ligne2.setFont(UITheme.SMALL);
-        ligne2.setForeground(UITheme.PRIMARY_FONCE);
-        ligne2.setAlignmentX(Component.LEFT_ALIGNMENT);
-        aide.add(ligne2);
-        p.add(aide, g);
-
         // Le clic sur le bouton OU la touche Entrée déclenchent la connexion
         btn.addActionListener(e -> tenterConnexion());
         mdpField.addActionListener(e -> tenterConnexion());
