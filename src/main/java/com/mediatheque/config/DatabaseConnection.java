@@ -11,11 +11,16 @@ import java.util.Properties;
  *
  * <p>Les paramètres sont lus dans cet ordre de priorité :
  * <ol>
- *   <li>Variables d'environnement {@code MEDIATHEQUE_DB_URL},
+ *   <li>Variables d'environnement {@code MEDIATHEQUE_DB_URL} (ou
+ *       {@code MEDIATHEQUE_DB_HOST}/{@code _PORT}/{@code _NAME}),
  *       {@code MEDIATHEQUE_DB_USER}, {@code MEDIATHEQUE_DB_PASSWORD}
  *       — utilisées en production pour ne pas versionner les secrets ;</li>
  *   <li>Fichier {@code database.properties} sur le classpath, sinon.</li>
  * </ol>
+ *
+ * <p>La base de données est hébergée sur le serveur du <b>client léger</b>.
+ * Pour pointer vers ce serveur, il suffit de renseigner {@code db.host} dans
+ * {@code database.properties} (ou {@code MEDIATHEQUE_DB_HOST} en env).
  */
 public final class DatabaseConnection {
 
@@ -42,9 +47,24 @@ public final class DatabaseConnection {
         user     = firstNonBlank(System.getenv("MEDIATHEQUE_DB_USER"),     props.getProperty("db.user"));
         password = firstNonBlank(System.getenv("MEDIATHEQUE_DB_PASSWORD"), props.getProperty("db.password"));
 
+        // Si db.url n'est pas fourni, on l'assemble à partir de db.host / db.port / db.name.
+        // Permet à l'utilisateur de ne changer qu'UNE seule ligne (db.host) pour pointer
+        // vers le serveur du client léger.
+        if (url == null) {
+            String host = firstNonBlank(System.getenv("MEDIATHEQUE_DB_HOST"), props.getProperty("db.host"));
+            String port = firstNonBlank(System.getenv("MEDIATHEQUE_DB_PORT"), props.getProperty("db.port"));
+            String name = firstNonBlank(System.getenv("MEDIATHEQUE_DB_NAME"), props.getProperty("db.name"));
+            if (host != null && name != null) {
+                if (port == null) port = "3306";
+                url = "jdbc:mysql://" + host + ":" + port + "/" + name
+                        + "?useSSL=false&serverTimezone=Europe/Paris"
+                        + "&allowPublicKeyRetrieval=true&characterEncoding=utf8";
+            }
+        }
+
         if (url == null) {
             throw new IllegalStateException(
-                    "URL JDBC non configurée (MEDIATHEQUE_DB_URL ou database.properties).");
+                    "URL JDBC non configurée (MEDIATHEQUE_DB_URL ou db.host dans database.properties).");
         }
     }
 
