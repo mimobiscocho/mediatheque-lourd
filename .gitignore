@@ -19,5 +19,10 @@ sources.txt
 *.log
 .DS_Store
 
+# Artefacts d'exécution locale (start.sh) et distribution générée
+.pid
+.env
+/dist/
+
 # Config locale Claude Code
 .claude/settings.local.json

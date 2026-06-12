@@ -1,31 +1,46 @@
 package com.mediatheque.view;
 
-import com.mediatheque.controller.Session;
 import com.mediatheque.dao.StatsDAO;
 import com.mediatheque.util.UITheme;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridLayout;
+import java.awt.RenderingHints;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
 
 /**
- * Tableau de bord d'accueil affichant des indicateurs synthétiques.
- * Une seule requête SQL agrégée alimente toutes les cartes.
+ * Tableau de bord : premier écran après la connexion.
+ * Affiche six compteurs (clients, techniciens, salles, animations,
+ * réservations, factures) alimentés par une seule requête SQL (StatsDAO).
  */
 public class DashboardPanel extends JPanel {
 
-    private static final Color[] PALETTE = {
-            UITheme.PRIMARY, UITheme.ACCENT, UITheme.SUCCESS,
-            UITheme.PRIMARY, UITheme.ACCENT, UITheme.SUCCESS
-    };
+    /** Icônes Unicode associées aux libellés des compteurs. */
+    private static final Map<String, String> ICONES;
+    static {
+        ICONES = new HashMap<>();
+        ICONES.put("Clients", "C");
+        ICONES.put("Techniciens", "T");
+        ICONES.put("Salles", "S");
+        ICONES.put("Animations", "A");
+        ICONES.put("Réservations", "R");
+        ICONES.put("Factures", "F");
+    }
 
     public DashboardPanel() {
         setLayout(new BorderLayout(0, 24));
@@ -33,51 +48,50 @@ public class DashboardPanel extends JPanel {
         setBorder(BorderFactory.createEmptyBorder(32, 32, 32, 32));
 
         add(creerEntete(), BorderLayout.NORTH);
-        add(creerCorps(),  BorderLayout.CENTER);
+        add(creerCorps(), BorderLayout.CENTER);
     }
 
+    /** En-tête de la page : titre + sous-titre + ligne séparatrice. */
     private JPanel creerEntete() {
         JPanel entete = new JPanel();
         entete.setOpaque(false);
         entete.setLayout(new BoxLayout(entete, BoxLayout.Y_AXIS));
 
-        JLabel salut = new JLabel("Bonjour, " + Session.getProfil().getPrenom() + ".");
-        salut.setFont(UITheme.TITLE);
-        salut.setForeground(UITheme.TEXT);
-        salut.setAlignmentX(LEFT_ALIGNMENT);
+        JLabel titre = UITheme.title("Tableau de bord");
+        titre.setAlignmentX(Component.LEFT_ALIGNMENT);
+        entete.add(titre);
 
-        JLabel sous = new JLabel("Voici l'activité de la médiathèque aujourd'hui.");
-        sous.setFont(UITheme.NORMAL);
-        sous.setForeground(UITheme.TEXT_MUTED);
-        sous.setBorder(BorderFactory.createEmptyBorder(4, 0, 0, 0));
-        sous.setAlignmentX(LEFT_ALIGNMENT);
-
-        entete.add(salut);
+        JLabel sous = UITheme.subtitle("Vue d'ensemble des données de la médiathèque");
+        sous.setAlignmentX(Component.LEFT_ALIGNMENT);
+        sous.setBorder(new EmptyBorder(4, 0, 0, 0));
         entete.add(sous);
+
         return entete;
     }
 
+    /** Corps : grille de compteurs (ou message d'erreur si la BD est injoignable). */
     private JPanel creerCorps() {
-        JPanel corps = new JPanel(new BorderLayout(0, 20));
+        JPanel corps = new JPanel(new BorderLayout(0, 16));
         corps.setOpaque(false);
 
+        // Grille 2 lignes x 3 colonnes pour les 6 compteurs
         JPanel grille = new JPanel(new GridLayout(2, 3, 18, 18));
         grille.setOpaque(false);
 
         try {
+            // On utilise LinkedHashMap pour préserver l'ordre des compteurs
             Map<String, Integer> compteurs = new StatsDAO().compteurs();
-            int i = 0;
-            for (Map.Entry<String, Integer> e : compteurs.entrySet()) {
-                grille.add(carte(e.getKey(), e.getValue(), PALETTE[i % PALETTE.length]));
-                i++;
+            Map<String, Integer> ordonnes = new LinkedHashMap<>(compteurs);
+            for (Map.Entry<String, Integer> e : ordonnes.entrySet()) {
+                grille.add(carte(e.getKey(), e.getValue()));
             }
         } catch (RuntimeException ex) {
-            corps.removeAll();
+            // Base inaccessible : on remplace la grille par un message clair
             JPanel err = UITheme.card();
             err.setLayout(new BorderLayout());
             JLabel msg = new JLabel("<html><div style='text-align:center;'>"
                     + "<b>Connexion à la base impossible.</b><br>"
-                    + "<span style='color:#64748B;'>Vérifiez que MySQL est démarré.</span></div></html>",
+                    + "Vérifiez que MySQL est démarré.</div></html>",
                     SwingConstants.CENTER);
             msg.setFont(UITheme.NORMAL);
             err.add(msg, BorderLayout.CENTER);
@@ -87,61 +101,82 @@ public class DashboardPanel extends JPanel {
 
         corps.add(grille, BorderLayout.NORTH);
 
-        // Section "À propos"
-        JPanel about = UITheme.card();
-        about.setLayout(new BoxLayout(about, BoxLayout.Y_AXIS));
-        JLabel aTitre = new JLabel("À propos de l'application");
-        aTitre.setFont(UITheme.H2);
-        aTitre.setForeground(UITheme.TEXT);
-        aTitre.setAlignmentX(LEFT_ALIGNMENT);
-        JLabel aTexte = new JLabel("<html><div style='color:#64748B;'>"
-                + "Application de gestion de la médiathèque (réservations, animations,<br>"
-                + "facturation). Base de données partagée avec le client web."
-                + "</div></html>");
-        aTexte.setFont(UITheme.NORMAL);
-        aTexte.setBorder(BorderFactory.createEmptyBorder(8, 0, 0, 0));
-        aTexte.setAlignmentX(LEFT_ALIGNMENT);
-        about.add(aTitre);
-        about.add(Box.createVerticalStrut(4));
-        about.add(aTexte);
-
-        JPanel southWrap = new JPanel(new BorderLayout());
-        southWrap.setOpaque(false);
-        southWrap.setBorder(BorderFactory.createEmptyBorder(8, 0, 0, 0));
-        southWrap.add(about, BorderLayout.NORTH);
-
-        JLabel pied = new JLabel("Médiathèque de Bourg-la-Reine — SEBAH Nassim — BTS SIO SLAM 2026",
+        // Pied de page : copyright discret
+        JPanel pied = new JPanel(new BorderLayout());
+        pied.setOpaque(false);
+        pied.setBorder(new EmptyBorder(20, 0, 0, 0));
+        JLabel sig = new JLabel(
+                "Médiathèque de Bourg-la-Reine — SEBAH Nassim — BTS SIO SLAM 2026",
                 SwingConstants.CENTER);
-        pied.setForeground(UITheme.TEXT_MUTED);
-        pied.setFont(UITheme.SMALL);
-        pied.setBorder(BorderFactory.createEmptyBorder(16, 0, 0, 0));
-        southWrap.add(pied, BorderLayout.SOUTH);
+        sig.setForeground(UITheme.TEXT_MUTED);
+        sig.setFont(UITheme.SMALL);
+        pied.add(sig, BorderLayout.SOUTH);
+        corps.add(pied, BorderLayout.SOUTH);
 
-        corps.add(southWrap, BorderLayout.CENTER);
+        // Pousse la grille vers le haut
+        corps.add(Box.createVerticalGlue(), BorderLayout.CENTER);
 
         return corps;
     }
 
-    private JPanel carte(String libelle, int valeur, Color couleur) {
-        JPanel carte = new JPanel(new BorderLayout(0, 6));
+    /** Une carte compteur : icône, libellé, grand nombre. */
+    private JPanel carte(String libelle, int valeur) {
+        JPanel carte = new JPanel(new BorderLayout(0, 10));
         carte.setBackground(UITheme.SURFACE);
-        carte.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(UITheme.BORDER, 1),
-                BorderFactory.createCompoundBorder(
-                        BorderFactory.createMatteBorder(3, 0, 0, 0, couleur),
-                        BorderFactory.createEmptyBorder(20, 22, 20, 22))));
-        carte.setPreferredSize(new Dimension(200, 130));
+        carte.setBorder(new CompoundBorder(
+                new UITheme.RoundedBorder(UITheme.BORDER_LIGHT, 12, 1),
+                new EmptyBorder(20, 22, 20, 22)));
+        carte.setPreferredSize(new Dimension(0, 130));
 
-        JLabel nom = new JLabel(libelle.toUpperCase());
-        nom.setFont(UITheme.SMALL.deriveFont(Font.BOLD));
+        // Ligne du haut : icône colorée + libellé
+        JPanel haut = new JPanel(new BorderLayout(12, 0));
+        haut.setOpaque(false);
+
+        String code = ICONES.getOrDefault(libelle, libelle.substring(0, 1));
+        IconPastille icone = new IconPastille(code);
+        haut.add(icone, BorderLayout.WEST);
+
+        JLabel nom = new JLabel(libelle);
+        nom.setFont(UITheme.H3);
         nom.setForeground(UITheme.TEXT_MUTED);
+        haut.add(nom, BorderLayout.CENTER);
 
+        carte.add(haut, BorderLayout.NORTH);
+
+        // Le grand nombre au centre / bas
         JLabel nombre = new JLabel(String.valueOf(valeur));
-        nombre.setFont(new Font(UITheme.TITLE.getFamily(), Font.BOLD, 38));
+        nombre.setFont(UITheme.BIG_NUMBER);
         nombre.setForeground(UITheme.TEXT);
-
-        carte.add(nom,    BorderLayout.NORTH);
         carte.add(nombre, BorderLayout.CENTER);
+
         return carte;
+    }
+
+    /** Pastille verte arrondie contenant une lettre (icône simple). */
+    private static final class IconPastille extends JComponent {
+        private final String texte;
+
+        IconPastille(String texte) {
+            this.texte = texte;
+            setPreferredSize(new Dimension(36, 36));
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+                    RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+            g2.setColor(UITheme.PRIMARY_CLAIR);
+            g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
+            g2.setColor(UITheme.PRIMARY_FONCE);
+            g2.setFont(UITheme.H2);
+            int sw = g2.getFontMetrics().stringWidth(texte);
+            int sh = g2.getFontMetrics().getAscent();
+            g2.drawString(texte, (getWidth() - sw) / 2,
+                    (getHeight() + sh) / 2 - 3);
+            g2.dispose();
+        }
     }
 }

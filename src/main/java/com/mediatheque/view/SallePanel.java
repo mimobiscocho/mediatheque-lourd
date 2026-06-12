@@ -61,8 +61,16 @@ public class SallePanel extends JPanel {
         return barre;
     }
 
+    /** Recharge la liste des salles depuis la base et remplit le tableau. */
     private void rafraichir() {
-        donnees = controller.lister();
+        try {
+            donnees = controller.lister();
+        } catch (RuntimeException ex) {
+            donnees = java.util.Collections.emptyList();
+            JOptionPane.showMessageDialog(this,
+                    "Impossible de charger les salles : " + ex.getMessage(),
+                    "Erreur", JOptionPane.ERROR_MESSAGE);
+        }
         model.setRowCount(0);
         for (Salle s : donnees) {
             model.addRow(new Object[]{s.getId(), s.getNom(), s.getCapacite(),

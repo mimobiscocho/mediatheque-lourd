@@ -7,7 +7,7 @@ public class Profil {
 
     private int id;
     private String login;
-    private String motDePasse; // empreinte SHA-256
+    private String motDePasse; // empreinte PBKDF2 salée (jamais le mot de passe en clair)
     private String nom;
     private String prenom;
     private String role; // ADMIN ou AGENT

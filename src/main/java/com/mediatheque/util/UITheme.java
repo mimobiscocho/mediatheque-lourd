@@ -1,75 +1,121 @@
 package com.mediatheque.util;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GraphicsEnvironment;
+import java.awt.Insets;
+import java.awt.RenderingHints;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
+import javax.swing.ButtonModel;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.border.Border;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.border.AbstractBorder;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
+import javax.swing.plaf.basic.BasicButtonUI;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableCellRenderer;
 
 /**
- * Charte graphique de l'application — design system simple, moderne et
- * professionnel. Toutes les couleurs, polices et styles communs sont
- * centralisés ici.
+ * Charte graphique de l'application.
+ *
+ * Centralise les couleurs, polices et composants stylisés pour conserver
+ * une identité visuelle homogène. Le vert principal reprend exactement la
+ * teinte utilisée par le client web (PHP), pour que les deux applications
+ * du projet aient le même rendu.
  */
 public final class UITheme {
 
-    // --- Palette --------------------------------------------------------
-    public static final Color PRIMARY        = new Color(0x1E40AF); // bleu institutionnel
-    public static final Color PRIMARY_HOVER  = new Color(0x1E3A8A);
-    public static final Color PRIMARY_SOFT   = new Color(0xEFF6FF);
+    // ----- Couleurs : vert principal et déclinaisons --------------------
 
-    public static final Color ACCENT         = new Color(0xEA580C); // orange chaleureux
-    public static final Color ACCENT_HOVER   = new Color(0xC2410C);
-    public static final Color ACCENT_SOFT    = new Color(0xFFF7ED);
+    /** Vert principal (entêtes, boutons d'action, focus). */
+    public static final Color PRIMARY        = new Color(0x2D6A4F);
+    /** Variante survol (hover) du vert. */
+    public static final Color PRIMARY_HOVER  = new Color(0x255A42);
+    /** Variante pressée (clic) du vert. */
+    public static final Color PRIMARY_PRESS  = new Color(0x1F4D39);
+    /** Vert très foncé (anciennement « PRIMARY_FONCE »). */
+    public static final Color PRIMARY_FONCE  = new Color(0x1F4D39);
+    /** Vert très clair : fond menu sélectionné, badges « OK ». */
+    public static final Color PRIMARY_CLAIR  = new Color(0xDDE9E2);
 
-    public static final Color SUCCESS        = new Color(0x15803D);
-    public static final Color SUCCESS_SOFT   = new Color(0xDCFCE7);
-    public static final Color WARNING        = new Color(0xB45309);
-    public static final Color WARNING_SOFT   = new Color(0xFEF3C7);
-    public static final Color DANGER         = new Color(0xB91C1C);
-    public static final Color DANGER_HOVER   = new Color(0x991B1B);
-    public static final Color DANGER_SOFT    = new Color(0xFEE2E2);
+    // ----- Couleurs : alertes ------------------------------------------
 
-    public static final Color BACKGROUND     = new Color(0xF8FAFC);
-    public static final Color SURFACE        = Color.WHITE;
-    public static final Color WHITE          = Color.WHITE;
-    public static final Color BORDER         = new Color(0xE2E8F0);
-    public static final Color BORDER_STRONG  = new Color(0xCBD5E1);
-    public static final Color TEXT           = new Color(0x0F172A);
-    public static final Color TEXT_MUTED     = new Color(0x64748B);
-    public static final Color ROW_HOVER      = new Color(0xF1F5F9);
-    public static final Color ROW_SELECTED   = new Color(0xDBEAFE);
+    public static final Color DANGER        = new Color(0xA63232);
+    public static final Color DANGER_HOVER  = new Color(0x912B2B);
+    public static final Color DANGER_PRESS  = new Color(0x7E2424);
+    public static final Color DANGER_CLAIR  = new Color(0xF6E1E1);
 
-    // --- Polices --------------------------------------------------------
-    private static final String FONT_FAMILY = pickFontFamily(
-            "Segoe UI", "SF Pro Text", "Inter", "Roboto", "Helvetica Neue", "Arial");
+    // ----- Couleurs : neutres -------------------------------------------
 
-    public static final Font TITLE  = new Font(FONT_FAMILY, Font.BOLD,  22);
-    public static final Font H2     = new Font(FONT_FAMILY, Font.BOLD,  16);
-    public static final Font H3     = new Font(FONT_FAMILY, Font.BOLD,  14);
-    public static final Font NORMAL = new Font(FONT_FAMILY, Font.PLAIN, 14);
-    public static final Font SMALL  = new Font(FONT_FAMILY, Font.PLAIN, 12);
+    public static final Color BACKGROUND   = new Color(0xF3F1EC);
+    public static final Color SURFACE      = Color.WHITE;
+    public static final Color WHITE        = Color.WHITE;
+    /** Fond de la barre latérale (légèrement teinté du beige principal). */
+    public static final Color SIDEBAR_BG   = new Color(0xFAF8F2);
+    public static final Color BORDER       = new Color(0xD8D6CF);
+    public static final Color BORDER_LIGHT = new Color(0xEAE8E2);
+    public static final Color TEXT         = new Color(0x1F2422);
+    public static final Color TEXT_MUTED   = new Color(0x6E7370);
+    /** Fond de la ligne survolée / sélectionnée. */
+    public static final Color ROW_SELECTED = new Color(0xD5E3DB);
+    /** Fond des lignes paires dans les tableaux (alternance). */
+    public static final Color ROW_ALT      = new Color(0xFAF8F2);
 
-    private UITheme() {
-    }
+    // Bouton secondaire « neutre » (modifier, etc.).
+    public static final Color NEUTRAL       = new Color(0x5C6660);
+    public static final Color NEUTRAL_HOVER = new Color(0x4E544F);
+    public static final Color NEUTRAL_PRESS = new Color(0x40443F);
 
-    private static String pickFontFamily(String... candidates) {
-        java.util.Set<String> available = new java.util.HashSet<>();
-        for (String s : java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment()
-                .getAvailableFontFamilyNames()) {
-            available.add(s);
-        }
+    // Bouton « fantôme » (fond blanc + bordure).
+    public static final Color GHOST_HOVER = new Color(0xF0EEE7);
+    public static final Color GHOST_PRESS = new Color(0xE6E3D9);
+
+    // ----- Polices ------------------------------------------------------
+    // On choisit la première police disponible parmi une liste de noms
+    // « modernes », avec une retombée systématique sur la police sans-serif
+    // par défaut si rien n'est trouvé.
+
+    private static final String FAMILY = chooseFamily(
+            "Inter", "SF Pro Text", "Segoe UI", "Roboto",
+            "Helvetica Neue", "DejaVu Sans", Font.SANS_SERIF);
+
+    public static final Font DISPLAY    = new Font(FAMILY, Font.BOLD,  26);
+    public static final Font TITLE      = new Font(FAMILY, Font.BOLD,  20);
+    public static final Font H2         = new Font(FAMILY, Font.BOLD,  15);
+    public static final Font H3         = new Font(FAMILY, Font.BOLD,  13);
+    public static final Font NORMAL     = new Font(FAMILY, Font.PLAIN, 13);
+    public static final Font BUTTON     = new Font(FAMILY, Font.BOLD,  12);
+    public static final Font SMALL      = new Font(FAMILY, Font.PLAIN, 12);
+    public static final Font SMALL_BOLD = new Font(FAMILY, Font.BOLD,  11);
+    public static final Font MENU       = new Font(FAMILY, Font.PLAIN, 13);
+    public static final Font BIG_NUMBER = new Font(FAMILY, Font.BOLD,  32);
+
+    private static String chooseFamily(String... candidates) {
+        Set<String> available = new HashSet<>(Arrays.asList(
+                GraphicsEnvironment.getLocalGraphicsEnvironment()
+                        .getAvailableFontFamilyNames()));
         for (String c : candidates) {
             if (available.contains(c)) {
                 return c;
@@ -78,61 +124,48 @@ public final class UITheme {
         return Font.SANS_SERIF;
     }
 
-    // ====================================================================
-    //  BOUTONS
-    // ====================================================================
+    /** Classe utilitaire : pas d'instance possible. */
+    private UITheme() {
+    }
 
-    /** Bouton principal (action positive : enregistrer, se connecter…). */
+    // ----- Boutons ------------------------------------------------------
+
+    /** Bouton principal : fond vert, texte blanc. */
     public static void stylePrimaryButton(JButton b) {
-        styleFilledButton(b, PRIMARY, PRIMARY_HOVER, WHITE);
+        styleFlat(b, PRIMARY, PRIMARY_HOVER, PRIMARY_PRESS, WHITE, null);
     }
 
-    /** Bouton d'accent (action secondaire). */
+    /** Bouton secondaire « neutre » (modifier, etc.). */
     public static void styleAccentButton(JButton b) {
-        styleFilledButton(b, ACCENT, ACCENT_HOVER, WHITE);
+        styleFlat(b, NEUTRAL, NEUTRAL_HOVER, NEUTRAL_PRESS, WHITE, null);
     }
 
-    /** Bouton de suppression (action destructive). */
+    /** Bouton de suppression : fond rouge. */
     public static void styleDangerButton(JButton b) {
-        styleFilledButton(b, DANGER, DANGER_HOVER, WHITE);
+        styleFlat(b, DANGER, DANGER_HOVER, DANGER_PRESS, WHITE, null);
     }
 
-    /** Bouton fantôme : fond blanc, bordure et texte sobres. */
+    /** Bouton discret : fond blanc, bordure grise, texte sombre. */
     public static void styleGhostButton(JButton b) {
-        b.setBackground(SURFACE);
-        b.setForeground(TEXT);
-        b.setFont(NORMAL);
-        b.setFocusPainted(false);
-        b.setOpaque(true);
-        b.setBorder(new CompoundBorder(
-                BorderFactory.createLineBorder(BORDER, 1),
-                new EmptyBorder(6, 14, 6, 14)));
-        attachHover(b, SURFACE, ROW_HOVER);
+        styleFlat(b, SURFACE, GHOST_HOVER, GHOST_PRESS, TEXT, BORDER);
     }
 
-    private static void styleFilledButton(JButton b, Color bg, Color hover, Color fg) {
-        b.setBackground(bg);
+    private static void styleFlat(JButton b, Color base, Color hover, Color press,
+                                  Color fg, Color border) {
         b.setForeground(fg);
-        b.setFont(NORMAL);
+        b.setFont(BUTTON);
         b.setFocusPainted(false);
+        b.setOpaque(false);
+        b.setContentAreaFilled(false);
         b.setBorderPainted(false);
-        b.setOpaque(true);
-        b.setBorder(new EmptyBorder(8, 16, 8, 16));
-        attachHover(b, bg, hover);
+        b.setRolloverEnabled(true);
+        b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        b.setBorder(new EmptyBorder(9, 18, 9, 18));
+        b.setUI(new FlatButtonUI(base, hover, press, border, 8));
     }
 
-    private static void attachHover(JButton b, Color normal, Color hover) {
-        b.addMouseListener(new MouseAdapter() {
-            @Override public void mouseEntered(MouseEvent e) { b.setBackground(hover); }
-            @Override public void mouseExited(MouseEvent e)  { b.setBackground(normal); }
-        });
-    }
+    // ----- Libellés -----------------------------------------------------
 
-    // ====================================================================
-    //  LIBELLÉS
-    // ====================================================================
-
-    /** Titre de page (utilisé dans l'en-tête de chaque module). */
     public static JLabel title(String texte) {
         JLabel l = new JLabel(texte);
         l.setFont(TITLE);
@@ -140,7 +173,6 @@ public final class UITheme {
         return l;
     }
 
-    /** Sous-titre / libellé secondaire. */
     public static JLabel subtitle(String texte) {
         JLabel l = new JLabel(texte);
         l.setFont(SMALL);
@@ -148,96 +180,252 @@ public final class UITheme {
         return l;
     }
 
-    // ====================================================================
-    //  CARTES & PANNEAUX
-    // ====================================================================
+    // ----- Panneaux -----------------------------------------------------
 
-    /** Bordure standard d'une carte : fine + padding intérieur. */
-    public static Border cardBorder() {
-        return new CompoundBorder(
-                BorderFactory.createLineBorder(BORDER, 1),
-                new EmptyBorder(18, 18, 18, 18));
-    }
-
-    /** Crée un panneau type « card » : surface blanche + bordure fine. */
+    /** Carte blanche : bord arrondi clair, padding intérieur confortable. */
     public static JPanel card() {
         JPanel p = new JPanel();
         p.setBackground(SURFACE);
-        p.setBorder(cardBorder());
+        p.setBorder(new CompoundBorder(
+                new RoundedBorder(BORDER_LIGHT, 12, 1),
+                new EmptyBorder(20, 22, 20, 22)));
         return p;
     }
 
-    // ====================================================================
-    //  TABLEAUX
-    // ====================================================================
+    // ----- Champs -------------------------------------------------------
 
-    /** Style homogène pour un tableau de données. */
+    /** Style moderne pour les champs texte (bordure arrondie + focus vert). */
+    public static void styleTextField(JTextField f) {
+        f.setFont(NORMAL);
+        f.setForeground(TEXT);
+        f.setBackground(SURFACE);
+        f.setBorder(new CompoundBorder(
+                new RoundedBorder(BORDER, 7, 1),
+                new EmptyBorder(7, 11, 7, 11)));
+        f.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                f.setBorder(new CompoundBorder(
+                        new RoundedBorder(PRIMARY, 7, 2),
+                        new EmptyBorder(6, 10, 6, 10)));
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                f.setBorder(new CompoundBorder(
+                        new RoundedBorder(BORDER, 7, 1),
+                        new EmptyBorder(7, 11, 7, 11)));
+            }
+        });
+    }
+
+    // ----- Tableaux -----------------------------------------------------
+
+    /** Mise en forme commune à tous les tableaux : sans grille verticale,
+     *  lignes alternées, en-tête en small caps. */
     public static void styleTable(JTable table) {
-        table.setRowHeight(36);
+        table.setRowHeight(38);
         table.setFont(NORMAL);
         table.setBackground(SURFACE);
         table.setForeground(TEXT);
+        table.setGridColor(BORDER_LIGHT);
         table.setShowVerticalLines(false);
         table.setShowHorizontalLines(true);
-        table.setGridColor(BORDER);
+        table.setIntercellSpacing(new Dimension(0, 0));
         table.setSelectionBackground(ROW_SELECTED);
         table.setSelectionForeground(TEXT);
-        table.setIntercellSpacing(new java.awt.Dimension(0, 0));
+        table.setFillsViewportHeight(true);
         table.getTableHeader().setReorderingAllowed(false);
 
+        // En-tête sobre, sans gradient, séparé par un trait fin
         JTableHeader header = table.getTableHeader();
-        header.setBackground(new Color(0xF1F5F9));
+        header.setBackground(SURFACE);
         header.setForeground(TEXT_MUTED);
-        header.setFont(H3);
+        header.setFont(SMALL_BOLD);
         header.setOpaque(true);
-        header.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, BORDER));
-        header.setPreferredSize(new java.awt.Dimension(0, 38));
+        header.setBorder(new MatteBorder(0, 0, 1, 0, BORDER));
+        header.setPreferredSize(new Dimension(0, 36));
+
+        // Renderer commun : padding gauche + alternance de fond
+        AlternatingRowRenderer renderer = new AlternatingRowRenderer();
+        for (int i = 0; i < table.getColumnCount(); i++) {
+            table.getColumnModel().getColumn(i).setCellRenderer(renderer);
+        }
     }
 
-    /** Encapsule un tableau dans un scroll pane avec le style « card ». */
+    /** Place le tableau dans un scroll-pane avec bord arrondi clair. */
     public static JScrollPane wrapTable(JTable table) {
         JScrollPane scroll = new JScrollPane(table);
-        scroll.setBackground(SURFACE);
         scroll.getViewport().setBackground(SURFACE);
-        scroll.setBorder(BorderFactory.createLineBorder(BORDER, 1));
+        scroll.setBorder(new RoundedBorder(BORDER_LIGHT, 10, 1));
+        scroll.setBackground(SURFACE);
         return scroll;
     }
 
-    // ====================================================================
-    //  PASTILLES DE STATUT (badges)
-    // ====================================================================
+    /** Renderer « badge pilule » pour des colonnes Oui/Non, Actif/Inactif. */
+    public static TableCellRenderer badgeRenderer() {
+        return new BadgeRenderer();
+    }
 
-    /** Crée un libellé de type « badge » coloré (statut, type…). */
-    public static JLabel badge(String text, Color bg, Color fg) {
-        JLabel l = new JLabel(text);
+    /** Crée un label « badge » (pilule colorée) utilisable seul. */
+    public static JLabel badge(String texte, boolean positif) {
+        JLabel l = new JLabel(texte, SwingConstants.CENTER);
+        l.setFont(SMALL_BOLD);
         l.setOpaque(true);
-        l.setBackground(bg);
-        l.setForeground(fg);
-        l.setFont(SMALL.deriveFont(Font.BOLD));
-        l.setBorder(new EmptyBorder(2, 8, 2, 8));
+        l.setBackground(positif ? PRIMARY_CLAIR : DANGER_CLAIR);
+        l.setForeground(positif ? PRIMARY_FONCE : DANGER);
+        l.setBorder(new EmptyBorder(3, 10, 3, 10));
         return l;
     }
 
-    // ====================================================================
-    //  HELPERS DIVERS
-    // ====================================================================
+    // ----- Helpers internes --------------------------------------------
 
-    /** Séparateur horizontal de la couleur de bordure. */
-    public static JPanel hairline() {
-        JPanel p = new JPanel();
-        p.setBackground(BORDER);
-        p.setPreferredSize(new java.awt.Dimension(1, 1));
-        p.setMaximumSize(new java.awt.Dimension(Integer.MAX_VALUE, 1));
-        return p;
+    /** Bordure peinte avec coins arrondis (pour cartes, champs, boutons). */
+    public static final class RoundedBorder extends AbstractBorder {
+        private final Color color;
+        private final int radius;
+        private final int thickness;
+
+        public RoundedBorder(Color color, int radius, int thickness) {
+            this.color = color;
+            this.radius = radius;
+            this.thickness = thickness;
+        }
+
+        @Override
+        public void paintBorder(Component c, Graphics g, int x, int y, int w, int h) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(color);
+            g2.setStroke(new BasicStroke(thickness));
+            int off = thickness / 2;
+            g2.drawRoundRect(x + off, y + off,
+                    w - thickness, h - thickness, radius, radius);
+            g2.dispose();
+        }
+
+        @Override
+        public Insets getBorderInsets(Component c) {
+            int t = Math.max(thickness, 1);
+            return new Insets(t, t, t, t);
+        }
+
+        @Override
+        public Insets getBorderInsets(Component c, Insets insets) {
+            int t = Math.max(thickness, 1);
+            insets.left = insets.right = insets.top = insets.bottom = t;
+            return insets;
+        }
     }
 
-    /** Bordure compound : marge externe + ligne. */
-    public static Border framed(int topPx, Color color) {
-        return new MatteBorder(topPx, 0, 0, 0, color);
+    /** Délégué d'interface plat pour bouton (coin arrondi + hover/press). */
+    private static final class FlatButtonUI extends BasicButtonUI {
+        private final Color base;
+        private final Color hover;
+        private final Color press;
+        private final Color border;
+        private final int radius;
+
+        FlatButtonUI(Color base, Color hover, Color press, Color border, int radius) {
+            this.base = base;
+            this.hover = hover;
+            this.press = press;
+            this.border = border;
+            this.radius = radius;
+        }
+
+        @Override
+        public void installUI(JComponent c) {
+            super.installUI(c);
+            AbstractButton b = (AbstractButton) c;
+            b.setRolloverEnabled(true);
+        }
+
+        @Override
+        public void paint(Graphics g, JComponent c) {
+            AbstractButton b = (AbstractButton) c;
+            ButtonModel m = b.getModel();
+            Color fill;
+            if (!b.isEnabled()) {
+                fill = blend(base, BACKGROUND, 0.6f);
+            } else if (m.isPressed()) {
+                fill = press;
+            } else if (m.isRollover()) {
+                fill = hover;
+            } else {
+                fill = base;
+            }
+
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(fill);
+            g2.fillRoundRect(0, 0, b.getWidth(), b.getHeight(), radius, radius);
+            if (border != null) {
+                g2.setColor(border);
+                g2.drawRoundRect(0, 0, b.getWidth() - 1, b.getHeight() - 1,
+                        radius, radius);
+            }
+            g2.dispose();
+
+            super.paint(g, c);
+        }
     }
 
-    /** Indique qu'un composant est utilisable comme curseur main au survol. */
-    public static void clickable(Component c) {
-        c.setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.HAND_CURSOR));
+    /** Mélange deux couleurs (utilisé pour griser un bouton désactivé). */
+    private static Color blend(Color a, Color b, float t) {
+        float u = 1f - t;
+        return new Color(
+                Math.round(a.getRed() * u + b.getRed() * t),
+                Math.round(a.getGreen() * u + b.getGreen() * t),
+                Math.round(a.getBlue() * u + b.getBlue() * t));
+    }
+
+    /** Renderer par défaut : alternance de fond + padding gauche. */
+    private static final class AlternatingRowRenderer extends DefaultTableCellRenderer {
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+            Component c = super.getTableCellRendererComponent(
+                    table, value, isSelected, false, row, column);
+            if (!isSelected) {
+                c.setBackground(row % 2 == 0 ? SURFACE : ROW_ALT);
+                c.setForeground(TEXT);
+            }
+            if (c instanceof JLabel) {
+                JLabel l = (JLabel) c;
+                l.setBorder(new EmptyBorder(0, 14, 0, 14));
+            }
+            return c;
+        }
+    }
+
+    /** Renderer « badge pilule » centré pour cellule de statut. */
+    private static final class BadgeRenderer extends DefaultTableCellRenderer {
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+            String txt = String.valueOf(value);
+            boolean positif = txt.equalsIgnoreCase("Oui")
+                    || txt.equalsIgnoreCase("Actif")
+                    || txt.equalsIgnoreCase("Disponible")
+                    || txt.equalsIgnoreCase("OK");
+
+            JPanel wrap = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+            wrap.setOpaque(true);
+            wrap.setBackground(isSelected ? ROW_SELECTED
+                    : (row % 2 == 0 ? SURFACE : ROW_ALT));
+            JLabel pill = new JLabel(txt);
+            pill.setFont(SMALL_BOLD);
+            pill.setOpaque(true);
+            pill.setBackground(positif ? PRIMARY_CLAIR : DANGER_CLAIR);
+            pill.setForeground(positif ? PRIMARY_FONCE : DANGER);
+            pill.setBorder(BorderFactory.createCompoundBorder(
+                    new RoundedBorder(positif ? PRIMARY_CLAIR : DANGER_CLAIR, 10, 1),
+                    new EmptyBorder(2, 10, 2, 10)));
+            wrap.add(pill);
+            return wrap;
+        }
     }
 }

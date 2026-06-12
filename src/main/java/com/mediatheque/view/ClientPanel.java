@@ -103,8 +103,16 @@ public class ClientPanel extends JPanel {
         return barre;
     }
 
+    /** Recharge la liste complète depuis la base puis remplit le tableau. */
     private void rafraichir() {
-        donnees = controller.lister();
+        try {
+            donnees = controller.lister();
+        } catch (RuntimeException ex) {
+            donnees = java.util.Collections.emptyList();
+            JOptionPane.showMessageDialog(this,
+                    "Impossible de charger les clients : " + ex.getMessage(),
+                    "Erreur", JOptionPane.ERROR_MESSAGE);
+        }
         peupler();
     }
 

@@ -8,17 +8,17 @@ Situation professionnelle n°2 (SP2) — BTS SIO option SLAM — Session 2026
 
 ## Sommaire
 
-1. [Fonctionnalités](#-fonctionnalités)
-2. [Architecture](#-architecture)
-3. [Base de données](#-base-de-données)
-4. [Installation et lancement](#-installation-et-lancement)
-5. [Comptes de démonstration](#-comptes-de-démonstration)
-6. [Documentation](#-documentation)
-7. [Technologies](#-technologies)
+1. [Fonctionnalités](#fonctionnalités)
+2. [Architecture](#architecture)
+3. [Base de données](#base-de-données)
+4. [Installation et lancement](#installation-et-lancement)
+5. [Comptes de démonstration](#comptes-de-démonstration)
+6. [Documentation](#documentation)
+7. [Technologies](#technologies)
 
 ---
 
-## 🎯 Fonctionnalités
+## Fonctionnalités
 
 L'application permet aux agents administratifs de gérer, depuis une interface centralisée :
 
@@ -34,7 +34,7 @@ L'application permet aux agents administratifs de gérer, depuis une interface c
 
 Chaque module propose un **CRUD complet** (Créer, Lire, Mettre à jour, Supprimer).
 
-## 🏗️ Architecture
+## Architecture
 
 Le projet applique le patron **MVC (Modèle-Vue-Contrôleur)** :
 
@@ -53,7 +53,7 @@ src/main/java/com/mediatheque/
 - **Vue** : fenêtres et panneaux Swing (aucune logique métier).
 - **Contrôleur** : validation et orchestration entre vue et DAO.
 
-## 🗄️ Base de données — schéma unifié
+## Base de données — schéma unifié
 
 L'application partage **une seule base** `mediatheque` avec le client léger
 (application web PHP). Le schéma est strictement identique dans les deux dépôts.
@@ -75,7 +75,7 @@ L'application partage **une seule base** `mediatheque` avec le client léger
   sont définis pour le léger.
 - Scripts dans `sql/` : `01_schema.sql` (structure + triggers), `02_data.sql` (jeu de données).
 
-## 🚀 Installation et lancement
+## Installation et lancement
 
 ### Prérequis
 - **JDK 17** ou supérieur
@@ -132,7 +132,7 @@ java -jar target/mediatheque-clientlourd-jar-with-dependencies.jar
 
 **Sous Eclipse :** importer comme projet Maven existant (`File > Import > Existing Maven Projects`).
 
-## 🔑 Comptes de démonstration
+## Comptes de démonstration
 
 | Login | Mot de passe | Rôle |
 |-------|--------------|------|
@@ -143,7 +143,7 @@ java -jar target/mediatheque-clientlourd-jar-with-dependencies.jar
 > (600 000 itérations, sel aléatoire de 16 octets par compte — cf.
 > `util/PasswordUtil`).
 
-## 📚 Documentation
+## Documentation
 
 | Document | Contenu |
 |----------|---------|
@@ -151,7 +151,7 @@ java -jar target/mediatheque-clientlourd-jar-with-dependencies.jar
 | [`docs/documentation-utilisateur.md`](docs/documentation-utilisateur.md) | Guide utilisateur pas à pas (connexion, modules, messages, bonnes pratiques) |
 | [`docs/gestion-incidents.md`](docs/gestion-incidents.md) | Suivi des incidents rencontrés et résolutions (GLPI) |
 
-## 🧰 Technologies
+## Technologies
 
 Java 17 · Swing · JDBC · MySQL 8 · Maven · Docker Compose · Git/GitHub · architecture MVC + DAO.
 

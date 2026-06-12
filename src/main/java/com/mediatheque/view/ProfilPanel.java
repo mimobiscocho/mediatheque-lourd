@@ -61,8 +61,16 @@ public class ProfilPanel extends JPanel {
         return barre;
     }
 
+    /** Recharge la liste des profils depuis la base et remplit le tableau. */
     private void rafraichir() {
-        donnees = controller.lister();
+        try {
+            donnees = controller.lister();
+        } catch (RuntimeException ex) {
+            donnees = java.util.Collections.emptyList();
+            JOptionPane.showMessageDialog(this,
+                    "Impossible de charger les profils : " + ex.getMessage(),
+                    "Erreur", JOptionPane.ERROR_MESSAGE);
+        }
         model.setRowCount(0);
         for (Profil p : donnees) {
             model.addRow(new Object[]{p.getId(), p.getLogin(), p.getNom(), p.getPrenom(), p.getRole()});
